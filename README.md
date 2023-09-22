@@ -1,27 +1,28 @@
----
-title: Gin
-description: A Gin server
-tags:
-  - gin
-  - golang
----
+# Connecting to PlanetScale from Go
 
-# Gin Example
+This example demonstrates how to connect a Go application to a PlanetScale database using [`go-sql-driver/mysql`](https://github.com/go-sql-driver/mysql).
 
-This example starts an [Gin](https://gin-gonic.com/) server.
+Follow the instructions below to find and insert your PlanetScale credentials.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/dTvvSf)
+## Getting the credentials
 
-## ✨ Features
+1. In the [PlanetScale dashboard](https://app.planetscale.com), select the database you want to connect to.
+2. Click "**Branches**" and select the branch you want to connect to.
+3. Click "**Connect**".
+4. Select "**Go**" from the "**Connect from**" dropdown.
+5. If the password is blurred, click "**New password**".
+6. Copy the contents of the `.env` tab. You won't be able to see the password again.
 
-- Gin
-- Go
+## Connecting your database
 
-## 💁‍♀️ How to use
+1. Create a file in the root of the project called `.env` and paste the connection details here from the previous section.
+2. Run the app using `go run .` in a terminal.
+3. Use `tests.http` file with the VS Code Rest Client plugin to test the API, or use the contents as a reference for your preferred API testing software.
 
-- Connect to your Railway project `railway link`
-- Start the development server `railway run go run main.go`
+You can find more information in the [Foreign key constraints section of the Go quickstart](https://planetscale.com/docs/tutorials/connect-go-app#foreign-key-constraints).
 
-## 📝 Notes
+## More resources
 
-The server started simply returns a `message: Hello world!` payload in JSON. The server code is located in the `main.go` file.
+**Go resources**
+
+- For more in-depth Go instructions, check out the [Go quickstart](https://planetscale.com/docs/tutorials/connect-go-app).

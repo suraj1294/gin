@@ -15,6 +15,8 @@ import (
 
 var db *sql.DB
 
+var err error
+
 type Product struct {
 	Id    int64
 	Name  string
@@ -23,12 +25,18 @@ type Product struct {
 
 func main() {
 	// Load in the `.env` file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("failed to load env", err)
+
+	dsn := os.Getenv("GIN_MODE")
+
+	if dsn != "release" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("failed to load env", err)
+		}
 	}
 
 	// Open a connection to the database
+
 	db, err = sql.Open("mysql", os.Getenv("DSN"))
 	if err != nil {
 		log.Fatal("failed to open db connection", err)
@@ -44,6 +52,7 @@ func main() {
 
 	// Run the router
 	router.Run()
+
 }
 
 func GetProducts(c *gin.Context) {

@@ -4,18 +4,14 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
+	"github.com/suraj1294/go-gin-planetscale/handler"
 )
 
 var db *sql.DB
-
-var err error
 
 type Product struct {
 	Id    int64
@@ -26,92 +22,19 @@ type Product struct {
 func main() {
 	// Load in the `.env` file
 
-	dsn := os.Getenv("GIN_MODE")
-
-	if dsn != "release" {
-		err := godotenv.Load()
-		if err != nil {
-			log.Fatal("failed to load env", err)
-		}
-	}
-
-	// Open a connection to the database
-
-	db, err = sql.Open("mysql", os.Getenv("DSN"))
-	if err != nil {
-		log.Fatal("failed to open db connection", err)
-	}
+	productHandler := handler.GetProductHandler()
 
 	// Build router & define routes
 	router := gin.Default()
-	router.GET("/products", GetProducts)
-	router.GET("/products/:productId", GetSingleProduct)
-	router.POST("/products", CreateProduct)
-	router.PUT("/products/:productId", UpdateProduct)
+	router.GET("/products", productHandler.GetProducts)
+	router.GET("/products/:productId", productHandler.GetProduct)
+	router.POST("/products", productHandler.AddProduct)
+	router.PUT("/products/:productId", productHandler.UpdateProduct)
 	router.DELETE("/products/:productId", DeleteProduct)
 
 	// Run the router
 	router.Run()
 
-}
-
-func GetProducts(c *gin.Context) {
-	query := "SELECT * FROM products"
-	res, err := db.Query(query)
-	defer res.Close()
-	if err != nil {
-		log.Fatal("(GetProducts) db.Query", err)
-	}
-
-	products := []Product{}
-	for res.Next() {
-		var product Product
-		err := res.Scan(&product.Id, &product.Name, &product.Price)
-		if err != nil {
-			log.Fatal("(GetProducts) res.Scan", err)
-		}
-		products = append(products, product)
-	}
-
-	c.JSON(http.StatusOK, products)
-}
-
-func GetSingleProduct(c *gin.Context) {
-	productId := c.Param("productId")
-	productId = strings.ReplaceAll(productId, "/", "")
-	productIdInt, err := strconv.Atoi(productId)
-	if err != nil {
-		log.Fatal("(GetSingleProduct) strconv.Atoi", err)
-	}
-
-	var product Product
-	query := `SELECT * FROM products WHERE id = ?`
-	err = db.QueryRow(query, productIdInt).Scan(&product.Id, &product.Name, &product.Price)
-	if err != nil {
-		log.Fatal("(GetSingleProduct) db.Exec", err)
-	}
-
-	c.JSON(http.StatusOK, product)
-}
-
-func CreateProduct(c *gin.Context) {
-	var newProduct Product
-	err := c.BindJSON(&newProduct)
-	if err != nil {
-		log.Fatal("(CreateProduct) c.BindJSON", err)
-	}
-
-	query := `INSERT INTO products (name, price) VALUES (?, ?)`
-	res, err := db.Exec(query, newProduct.Name, newProduct.Price)
-	if err != nil {
-		log.Fatal("(CreateProduct) db.Exec", err)
-	}
-	newProduct.Id, err = res.LastInsertId()
-	if err != nil {
-		log.Fatal("(CreateProduct) res.LastInsertId", err)
-	}
-
-	c.JSON(http.StatusOK, newProduct)
 }
 
 func UpdateProduct(c *gin.Context) {

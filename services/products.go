@@ -8,26 +8,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/suraj1294/go-gin-planetscale/db"
 	"github.com/suraj1294/go-gin-planetscale/logger"
+	"github.com/suraj1294/go-gin-planetscale/utils"
 )
 
-//var err error = nil
-
 type Product struct {
-	Id    int64  `json:"id" db:"id" goqu:"skipinsert,skipupdate"`
-	Name  string `json:"name" db:"name"`
-	Price int    `json:"price" db:"price, ,omitempty" `
-}
-
-type Option func(p Product) Product
-
-func NewProduct(name string, rest ...Option) Product {
-	p := Product{}
-	p.Name = name
-
-	for _, o := range rest {
-		p = o(p)
-	}
-	return p
+	Id    *int64  `json:"id,omitempty" db:"id"  goqu:"skipinsert,skipupdate"`
+	Name  *string `json:"name,omitempty" db:"name" `
+	Price *int    `json:"price,omitempty" db:"price"`
 }
 
 type ProductService struct {
@@ -86,7 +73,9 @@ func (p ProductService) Add(newProduct *Product) (*Product, *error) {
 		logger.Error("(CreateProduct) db.Exec")
 		return nil, &err
 	}
-	newProduct.Id, err = res.LastInsertId()
+	Id, err := res.LastInsertId()
+
+	newProduct.Id = &Id
 	if err != nil {
 		logger.Error("(CreateProduct) res.LastInsertId")
 		return nil, &err
@@ -97,20 +86,25 @@ func (p ProductService) Add(newProduct *Product) (*Product, *error) {
 
 func (p ProductService) Update(update *Product, id int) (*Product, *error) {
 
-	ds := p.mysql.Update("products").Set(Product{Name: update.Name}).Where(goqu.Ex{"id": goqu.Op{"eq": id}})
+	output, _ := utils.MarshalRequest(update)
+
+	ds := p.mysql.Update("products").Set(output).Where(goqu.Ex{"id": goqu.Op{"eq": id}})
 
 	updateQuery, _, _ := ds.ToSQL()
 
 	fmt.Println(updateQuery)
 
-	_, err := p.sqlx.Exec(updateQuery)
-
-	update.Id = int64(id)
-
-	if err != nil {
-		logger.Error("(UpdateProduct) db.Exec")
-		return nil, &err
+	if updateQuery != "" {
+		_, err := p.sqlx.Exec(updateQuery)
+		if err != nil {
+			logger.Error("(UpdateProduct) db.Exec")
+			return nil, &err
+		}
 	}
+
+	updateId := int64(id)
+	update.Id = &updateId
+
 	return update, nil
 }
 

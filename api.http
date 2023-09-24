@@ -3,7 +3,7 @@
 GET {{host}}/products
 
 ###
-GET {{host}}/products/1
+GET {{host}}/products/4
 
 ###
 
@@ -11,15 +11,15 @@ POST {{host}}/products
 Content-Type: application/json
 
 {
-    "name":"test",
-    "price":100
+    "name":"test6"
+    
 }
 
 ###
-PUT {{host}}/products/4
+PUT {{host}}/products/6
 Content-Type: application/json
 
 {
-    "name":"test4",
-    "price":100
+    "name":"test5",
+    "price": 0
 }

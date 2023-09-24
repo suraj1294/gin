@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -67,9 +68,12 @@ func (product *ProductHandler) AddProduct(c *gin.Context) {
 func (product *ProductHandler) UpdateProduct(c *gin.Context) {
 
 	var updates *services.Product
-	err := c.BindJSON(&updates)
+	err := c.Bind(&updates)
+
 	if err != nil {
 		logger.Error("(UpdateProduct) c.BindJSON " + err.Error())
+
+		c.JSON(http.StatusBadRequest, gin.H{"errros": fmt.Sprintf("%v", err)})
 	}
 
 	productId := c.Param("productId")

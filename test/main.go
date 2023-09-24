@@ -12,7 +12,10 @@ func main() {
 
 	dialect := goqu.Dialect("mysql")
 
-	product := services.Product{Id: 1, Name: "Suraj", Price: 34}
+	price := 34
+	Id := int64(1)
+	Name := "suraj"
+	product := services.Product{Id: &Id, Name: &Name, Price: &price}
 
 	ds := dialect.Insert("product").Rows(
 		&product,
@@ -20,7 +23,7 @@ func main() {
 	insertSQL, args, _ := ds.ToSQL()
 	fmt.Println(insertSQL, args)
 
-	updateProduct := services.Product{Name: "Suraj"}
+	updateProduct := services.Product{Name: &Name}
 
 	ds1 := dialect.Update("products").Set(&updateProduct).Where(goqu.Ex{"id": goqu.Op{"eq": 123}})
 

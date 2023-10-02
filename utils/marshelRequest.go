@@ -8,16 +8,16 @@ import (
 
 func MarshalRequest(data interface{}) (*map[string]interface{}, *error) {
 
-	var inInterface map[string]interface{}
-	inrec, err := json.Marshal(data)
+	var struct_to_map map[string]interface{}
+	buffer, err := json.Marshal(data)
 
 	if err != nil {
 		return nil, &err
 	}
 
-	json.Unmarshal(inrec, &inInterface)
+	json.Unmarshal(buffer, &struct_to_map)
 
-	return &inInterface, nil
+	return &struct_to_map, nil
 
 }
 
